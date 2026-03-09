@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desafio das Letras - IFMS</title>
+    <title>Letramento Digital - IFMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            --primaria: #ff6347;
-            --secundaria: #4CAF50;
-            --fundo: #f0f8ff;
+            --cor-primaria: #2c3e50;
+            --cor-acerto: #27ae60;
+            --cor-erro: #e74c3c;
+            --cor-botao: #3498db;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--fundo);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #ecf0f1;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -23,180 +25,179 @@
 
         #game-container {
             background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
             text-align: center;
             width: 100%;
-            max-width: 450px;
-            border: 4px solid #ddd;
+            max-width: 400px;
+            border-bottom: 8px solid #bdc3c7;
         }
 
-        .header-info {
+        .placar {
             display: flex;
             justify-content: space-between;
             font-weight: bold;
+            color: var(--cor-primaria);
             margin-bottom: 20px;
-            color: #555;
+            font-size: 1.1rem;
         }
 
-        #display-emoji {
-            font-size: 100px;
-            margin: 20px 0;
-            min-height: 130px;
+        #icon-display {
+            font-size: 120px;
+            margin: 30px 0;
+            color: var(--cor-primaria);
+            height: 140px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .btn-letra {
-            font-size: 28px;
+            font-size: 35px;
             font-weight: bold;
-            padding: 15px 25px;
-            margin: 8px;
+            padding: 20px;
+            margin: 10px;
             cursor: pointer;
             border: none;
-            border-radius: 12px;
-            background-color: #3498db;
+            border-radius: 20px;
+            background-color: var(--cor-botao);
             color: white;
-            transition: 0.2s;
+            transition: all 0.2s;
+            width: 80px;
+            box-shadow: 0 5px #2980b9;
         }
 
-        .btn-letra:hover:not(:disabled) { background-color: #2980b9; transform: scale(1.05); }
-        .btn-letra:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-letra:hover { transform: translateY(-3px); box-shadow: 0 8px #2980b9; }
+        .btn-letra:active { transform: translateY(2px); box-shadow: 0 2px #2980b9; }
 
         #feedback {
-            height: 40px;
-            font-size: 1.2rem;
-            margin: 20px 0;
+            font-size: 1.3rem;
+            margin-top: 25px;
             font-weight: bold;
+            min-height: 30px;
         }
 
-        #btn-reiniciar {
+        .btn-reset {
             display: none;
-            background-color: var(--primaria);
+            margin-top: 20px;
+            padding: 15px 30px;
+            background: var(--cor-primaria);
             color: white;
             border: none;
-            padding: 12px 25px;
             border-radius: 10px;
-            font-size: 1rem;
             cursor: pointer;
-            text-transform: uppercase;
+            font-size: 1rem;
         }
-
-        .acertou { color: var(--secundaria); }
-        .errou { color: var(--primaria); }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div class="header-info">
-        <span>Placar: <span id="score">0</span></span>
+    <div class="placar">
+        <span>Pontos: <span id="score">0</span></span>
         <span>Questão: <span id="round">1</span>/5</span>
     </div>
 
-    <div id="display-emoji">🍎</div>
-
-    <div id="opcoes">
+    <div id="icon-display">
         </div>
 
-    <div id="feedback">Qual é a letra inicial?</div>
-    
-    <button id="btn-reiniciar" onclick="iniciarJogo()">Jogar Novamente</button>
+    <div id="opcoes"></div>
+
+    <div id="feedback">Qual a letra inicial?</div>
+    <button id="btn-reset" class="btn-reset" onclick="resetar()">Tentar Novamente</button>
 </div>
 
 <script>
+    // Agora usamos classes do Font Awesome em vez de Emojis
     const bancoDeDados = [
-        { l: 'A', e: '🍎' }, { l: 'B', e: '⚽' }, { l: 'C', e: '🏠' },
-        { l: 'D', e: '🎲' }, { l: 'E', e: '🐘' }, { l: 'F', e: '🔥' },
-        { l: 'G', e: '🐱' }, { l: 'H', e: '🚁' }, { l: 'I', e: '🍦' },
-        { l: 'J', e: '🕹️' }
+        { l: 'A', icon: 'fa-apple-whole' },  // Maçã
+        { l: 'B', icon: 'fa-basketball' },   // Bola
+        { l: 'C', icon: 'fa-car' },          // Carro
+        { l: 'D', icon: 'fa-dice' },         // Dado
+        { l: 'E', icon: 'fa-envelope' },     // Envelope
+        { l: 'F', icon: 'fa-fire' },         // Fogo
+        { l: 'G', icon: 'fa-guitar' },       // Guitarra
+        { l: 'H', icon: 'fa-helicopter' },   // Helicóptero
+        { l: 'I', icon: 'fa-igloo' },        // Iglu
+        { l: 'J', icon: 'fa-jet-fighter' }   // Jato
     ];
 
     let questoesAtuais = [];
-    let indiceAtual = 0;
-    let placar = 0;
+    let index = 0;
+    let pontos = 0;
 
-    function iniciarJogo() {
-        placar = 0;
-        indiceAtual = 0;
-        document.getElementById('score').innerText = placar;
-        document.getElementById('btn-reiniciar').style.display = 'none';
+    function iniciar() {
+        pontos = 0;
+        index = 0;
+        document.getElementById('score').innerText = pontos;
+        document.getElementById('btn-reset').style.display = 'none';
         document.getElementById('opcoes').style.display = 'block';
         
-        // 1. Embaralha o banco de dados
-        const embaralhado = [...bancoDeDados].sort(() => Math.random() - 0.5);
-        
-        // 2. Pega apenas as primeiras 5 únicas
-        questoesAtuais = embaralhado.slice(0, 5);
-        
-        proximaQuestao();
+        // Embaralha e pega 5
+        questoesAtuais = [...bancoDeDados].sort(() => Math.random() - 0.5).slice(0, 5);
+        renderizar();
     }
 
-    function proximaQuestao() {
-        if (indiceAtual >= 5) {
-            finalizarJogo();
+    function renderizar() {
+        if(index >= 5) {
+            finalizar();
             return;
         }
 
-        const questao = questoesAtuais[indiceAtual];
-        document.getElementById('display-emoji').innerText = questao.e;
-        document.getElementById('round').innerText = indiceAtual + 1;
-        document.getElementById('feedback').innerText = "Qual é a letra inicial?";
-        document.getElementById('feedback').className = "";
-        
-        gerarBotoes(questao.l);
-    }
+        const q = questoesAtuais[index];
+        document.getElementById('round').innerText = index + 1;
+        document.getElementById('icon-display').innerHTML = `<i class="fa-solid ${q.icon}"></i>`;
+        document.getElementById('feedback').innerText = "Qual a letra inicial?";
+        document.getElementById('feedback').style.color = "#2c3e50";
 
-    function gerarBotoes(correta) {
+        // Gerar botões
         const container = document.getElementById('opcoes');
         container.innerHTML = "";
         
-        // Cria um set de letras para opções (a correta + 2 aleatórias)
-        let letras = new Set([correta]);
+        let letras = new Set([q.l]);
         while(letras.size < 3) {
-            let aleatoria = bancoDeDados[Math.floor(Math.random() * bancoDeDados.length)].l;
-            letras.add(aleatoria);
+            letras.add(bancoDeDados[Math.floor(Math.random()*10)].l);
         }
 
-        // Converte para array e embaralha os botões
         [...letras].sort(() => Math.random() - 0.5).forEach(letra => {
             const btn = document.createElement('button');
             btn.className = 'btn-letra';
             btn.innerText = letra;
-            btn.onclick = () => validarResposta(letra, correta);
+            btn.onclick = () => validar(letra, q.l);
             container.appendChild(btn);
         });
     }
 
-    function validarResposta(escolha, correta) {
-        const fb = document.getElementById('feedback');
-        const botoes = document.querySelectorAll('.btn-letra');
-        
-        // Desabilita botões para evitar cliques duplos
-        botoes.forEach(b => b.disabled = true);
+    function validar(escolha, correta) {
+        const f = document.getElementById('feedback');
+        const btns = document.querySelectorAll('.btn-letra');
+        btns.forEach(b => b.disabled = true);
 
-        if (escolha === correta) {
-            placar++;
-            document.getElementById('score').innerText = placar;
-            fb.innerText = "Muito bem! ✨";
-            fb.className = "acertou";
+        if(escolha === correta) {
+            pontos++;
+            document.getElementById('score').innerText = pontos;
+            f.innerText = "Correto! 🌟";
+            f.style.color = "#27ae60";
         } else {
-            fb.innerText = `Ops! A letra era ${correta}`;
-            fb.className = "errou";
+            f.innerText = `Erro! Era a letra ${correta}`;
+            f.style.color = "#e74c3c";
         }
 
-        indiceAtual++;
-        setTimeout(proximaQuestao, 1500);
+        index++;
+        setTimeout(renderizar, 1200);
     }
 
-    function finalizarJogo() {
-        document.getElementById('display-emoji').innerText = "🏆";
+    function finalizar() {
+        document.getElementById('icon-display').innerHTML = '<i class="fa-solid fa-trophy" style="color: #f1c40f;"></i>';
         document.getElementById('opcoes').style.display = 'none';
-        document.getElementById('feedback').innerText = `Fim de jogo! Você fez ${placar} pontos.`;
-        document.getElementById('btn-reiniciar').style.display = 'inline-block';
+        document.getElementById('feedback').innerText = `Fim! Você acertou ${pontos} de 5!`;
+        document.getElementById('btn-reset').style.display = 'inline-block';
     }
 
-    // Inicia ao carregar a página
-    window.onload = iniciarJogo;
+    function resetar() { iniciar(); }
+
+    window.onload = iniciar;
 </script>
 
 </body>
