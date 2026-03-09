@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafio das Letras - IFMS</title>
+    <style>
+        :root {
+            --primaria: #ff6347;
+            --secundaria: #4CAF50;
+            --fundo: #f0f8ff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--fundo);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #game-container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+            border: 4px solid #ddd;
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        #display-emoji {
+            font-size: 100px;
+            margin: 20px 0;
+            min-height: 130px;
+        }
+
+        .btn-letra {
+            font-size: 28px;
+            font-weight: bold;
+            padding: 15px 25px;
+            margin: 8px;
+            cursor: pointer;
+            border: none;
+            border-radius: 12px;
+            background-color: #3498db;
+            color: white;
+            transition: 0.2s;
+        }
+
+        .btn-letra:hover:not(:disabled) { background-color: #2980b9; transform: scale(1.05); }
+        .btn-letra:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        #feedback {
+            height: 40px;
+            font-size: 1.2rem;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        #btn-reiniciar {
+            display: none;
+            background-color: var(--primaria);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .acertou { color: var(--secundaria); }
+        .errou { color: var(--primaria); }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div class="header-info">
+        <span>Placar: <span id="score">0</span></span>
+        <span>Questão: <span id="round">1</span>/5</span>
+    </div>
+
+    <div id="display-emoji">🍎</div>
+
+    <div id="opcoes">
+        </div>
+
+    <div id="feedback">Qual é a letra inicial?</div>
+    
+    <button id="btn-reiniciar" onclick="iniciarJogo()">Jogar Novamente</button>
+</div>
+
+<script>
+    const bancoDeDados = [
+        { l: 'A', e: '🍎' }, { l: 'B', e: '⚽' }, { l: 'C', e: '🏠' },
+        { l: 'D', e: '🎲' }, { l: 'E', e: '🐘' }, { l: 'F', e: '🔥' },
+        { l: 'G', e: '🐱' }, { l: 'H', e: '🚁' }, { l: 'I', e: '🍦' },
+        { l: 'J', e: '🕹️' }
+    ];
+
+    let questoesAtuais = [];
+    let indiceAtual = 0;
+    let placar = 0;
+
+    function iniciarJogo() {
+        placar = 0;
+        indiceAtual = 0;
+        document.getElementById('score').innerText = placar;
+        document.getElementById('btn-reiniciar').style.display = 'none';
+        document.getElementById('opcoes').style.display = 'block';
+        
+        // 1. Embaralha o banco de dados
+        const embaralhado = [...bancoDeDados].sort(() => Math.random() - 0.5);
+        
+        // 2. Pega apenas as primeiras 5 únicas
+        questoesAtuais = embaralhado.slice(0, 5);
+        
+        proximaQuestao();
+    }
+
+    function proximaQuestao() {
+        if (indiceAtual >= 5) {
+            finalizarJogo();
+            return;
+        }
+
+        const questao = questoesAtuais[indiceAtual];
+        document.getElementById('display-emoji').innerText = questao.e;
+        document.getElementById('round').innerText = indiceAtual + 1;
+        document.getElementById('feedback').innerText = "Qual é a letra inicial?";
+        document.getElementById('feedback').className = "";
+        
+        gerarBotoes(questao.l);
+    }
+
+    function gerarBotoes(correta) {
+        const container = document.getElementById('opcoes');
+        container.innerHTML = "";
+        
+        // Cria um set de letras para opções (a correta + 2 aleatórias)
+        let letras = new Set([correta]);
+        while(letras.size < 3) {
+            let aleatoria = bancoDeDados[Math.floor(Math.random() * bancoDeDados.length)].l;
+            letras.add(aleatoria);
+        }
+
+        // Converte para array e embaralha os botões
+        [...letras].sort(() => Math.random() - 0.5).forEach(letra => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-letra';
+            btn.innerText = letra;
+            btn.onclick = () => validarResposta(letra, correta);
+            container.appendChild(btn);
+        });
+    }
+
+    function validarResposta(escolha, correta) {
+        const fb = document.getElementById('feedback');
+        const botoes = document.querySelectorAll('.btn-letra');
+        
+        // Desabilita botões para evitar cliques duplos
+        botoes.forEach(b => b.disabled = true);
+
+        if (escolha === correta) {
+            placar++;
+            document.getElementById('score').innerText = placar;
+            fb.innerText = "Muito bem! ✨";
+            fb.className = "acertou";
+        } else {
+            fb.innerText = `Ops! A letra era ${correta}`;
+            fb.className = "errou";
+        }
+
+        indiceAtual++;
+        setTimeout(proximaQuestao, 1500);
+    }
+
+    function finalizarJogo() {
+        document.getElementById('display-emoji').innerText = "🏆";
+        document.getElementById('opcoes').style.display = 'none';
+        document.getElementById('feedback').innerText = `Fim de jogo! Você fez ${placar} pontos.`;
+        document.getElementById('btn-reiniciar').style.display = 'inline-block';
+    }
+
+    // Inicia ao carregar a página
+    window.onload = iniciarJogo;
+</script>
+
+</body>
+</html>
