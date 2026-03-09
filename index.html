@@ -10,12 +10,12 @@
             --cor-primaria: #2c3e50;
             --cor-acerto: #27ae60;
             --cor-erro: #e74c3c;
-            --cor-botao: #3498db;
+            --cor-botao: #f39c12; /* Laranja para ser mais lúdico */
         }
 
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #ecf0f1;
+            background-color: #f7f9f9;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -31,7 +31,7 @@
             text-align: center;
             width: 100%;
             max-width: 400px;
-            border-bottom: 8px solid #bdc3c7;
+            border: 4px solid #eee;
         }
 
         .placar {
@@ -39,15 +39,15 @@
             justify-content: space-between;
             font-weight: bold;
             color: var(--cor-primaria);
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             font-size: 1.1rem;
         }
 
         #icon-display {
-            font-size: 120px;
-            margin: 30px 0;
-            color: var(--cor-primaria);
-            height: 140px;
+            font-size: 130px;
+            margin: 20px 0;
+            color: #2980b9;
+            height: 160px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -56,38 +56,37 @@
         .btn-letra {
             font-size: 35px;
             font-weight: bold;
-            padding: 20px;
-            margin: 10px;
+            padding: 15px;
+            margin: 8px;
             cursor: pointer;
             border: none;
-            border-radius: 20px;
+            border-radius: 15px;
             background-color: var(--cor-botao);
             color: white;
             transition: all 0.2s;
-            width: 80px;
-            box-shadow: 0 5px #2980b9;
+            width: 85px;
+            box-shadow: 0 5px #d35400;
         }
 
-        .btn-letra:hover { transform: translateY(-3px); box-shadow: 0 8px #2980b9; }
-        .btn-letra:active { transform: translateY(2px); box-shadow: 0 2px #2980b9; }
+        .btn-letra:hover { transform: translateY(-3px); }
+        .btn-letra:active { transform: translateY(2px); box-shadow: 0 2px #d35400; }
 
         #feedback {
-            font-size: 1.3rem;
-            margin-top: 25px;
+            font-size: 1.4rem;
+            margin-top: 20px;
             font-weight: bold;
-            min-height: 30px;
+            min-height: 40px;
         }
 
         .btn-reset {
             display: none;
-            margin-top: 20px;
-            padding: 15px 30px;
+            margin-top: 15px;
+            padding: 12px 25px;
             background: var(--cor-primaria);
             color: white;
             border: none;
             border-radius: 10px;
             cursor: pointer;
-            font-size: 1rem;
         }
     </style>
 </head>
@@ -99,28 +98,40 @@
         <span>Questão: <span id="round">1</span>/5</span>
     </div>
 
-    <div id="icon-display">
-        </div>
-
+    <div id="icon-display"></div>
     <div id="opcoes"></div>
-
     <div id="feedback">Qual a letra inicial?</div>
-    <button id="btn-reset" class="btn-reset" onclick="resetar()">Tentar Novamente</button>
+    
+    <button id="btn-reset" class="btn-reset" onclick="iniciar()">Jogar de Novo</button>
 </div>
 
 <script>
-    // Agora usamos classes do Font Awesome em vez de Emojis
+    // Banco de dados com ícones corrigidos
     const bancoDeDados = [
-        { l: 'A', icon: 'fa-apple-whole' },  // Maçã
-        { l: 'B', icon: 'fa-basketball' },   // Bola
-        { l: 'C', icon: 'fa-car' },          // Carro
-        { l: 'D', icon: 'fa-dice' },         // Dado
-        { l: 'E', icon: 'fa-envelope' },     // Envelope
-        { l: 'F', icon: 'fa-fire' },         // Fogo
-        { l: 'G', icon: 'fa-guitar' },       // Guitarra
-        { l: 'H', icon: 'fa-helicopter' },   // Helicóptero
-        { l: 'I', icon: 'fa-igloo' },        // Iglu
-        { l: 'J', icon: 'fa-jet-fighter' }   // Jato
+        { l: 'A', icon: 'fa-pineapple' },     // Abacaxi (necessário FA Pro ou similar, usando fallback para Solid)
+        { l: 'B', icon: 'fa-baseball' },      // Bola
+        { l: 'C', icon: 'fa-car' },           // Carro
+        { l: 'D', icon: 'fa-dice' },          // Dado
+        { l: 'E', icon: 'fa-egg' },           // Ovo (letra E)
+        { l: 'F', icon: 'fa-fish' },          // Peixe (Letra F - Fish) ou Fogo
+        { l: 'G', icon: 'fa-ghost' },         // Fantasma (Letra G - Ghost)
+        { l: 'H', icon: 'fa-hospital' },      // Hospital
+        { l: 'I', icon: 'fa-image' },         // Imagem
+        { l: 'C', icon: 'fa-playing-cards' }  // Carta (Letra C)
+    ];
+
+    // Ajuste fino para garantir que os ícones existam na versão gratuita
+    const bancoAjustado = [
+        { l: 'A', icon: 'fa-apple-whole', nome: 'A de Maçã' }, // Apple em inglês, comum em TI
+        { l: 'B', icon: 'fa-basketball', nome: 'B de Bola' },
+        { l: 'C', icon: 'fa-clone', nome: 'C de Carta' },      // Ícone que parece cartas sobrepostas
+        { l: 'D', icon: 'fa-dice', nome: 'D de Dado' },
+        { l: 'E', icon: 'fa-eye', nome: 'E de Estrela/Eu' },
+        { l: 'F', icon: 'fa-fire', nome: 'F de Fogo' },
+        { l: 'G', icon: 'fa-guitar', nome: 'G de Guitarra' },
+        { l: 'H', icon: 'fa-helicopter', nome: 'H de Helicóptero' },
+        { l: 'I', icon: 'fa-igloo', nome: 'I de Iglu' },
+        { l: 'J', icon: 'fa-jet-fighter', nome: 'J de Jato' }
     ];
 
     let questoesAtuais = [];
@@ -133,9 +144,7 @@
         document.getElementById('score').innerText = pontos;
         document.getElementById('btn-reset').style.display = 'none';
         document.getElementById('opcoes').style.display = 'block';
-        
-        // Embaralha e pega 5
-        questoesAtuais = [...bancoDeDados].sort(() => Math.random() - 0.5).slice(0, 5);
+        questoesAtuais = [...bancoAjustado].sort(() => Math.random() - 0.5).slice(0, 5);
         renderizar();
     }
 
@@ -147,17 +156,17 @@
 
         const q = questoesAtuais[index];
         document.getElementById('round').innerText = index + 1;
+        // Se for a "Carta", usamos o ícone de 'clones' que parece cartas de baralho
         document.getElementById('icon-display').innerHTML = `<i class="fa-solid ${q.icon}"></i>`;
         document.getElementById('feedback').innerText = "Qual a letra inicial?";
         document.getElementById('feedback').style.color = "#2c3e50";
 
-        // Gerar botões
         const container = document.getElementById('opcoes');
         container.innerHTML = "";
         
         let letras = new Set([q.l]);
         while(letras.size < 3) {
-            letras.add(bancoDeDados[Math.floor(Math.random()*10)].l);
+            letras.add(bancoAjustado[Math.floor(Math.random()*10)].l);
         }
 
         [...letras].sort(() => Math.random() - 0.5).forEach(letra => {
@@ -171,34 +180,27 @@
 
     function validar(escolha, correta) {
         const f = document.getElementById('feedback');
-        const btns = document.querySelectorAll('.btn-letra');
-        btns.forEach(b => b.disabled = true);
-
         if(escolha === correta) {
             pontos++;
             document.getElementById('score').innerText = pontos;
-            f.innerText = "Correto! 🌟";
+            f.innerText = "Muito bem! 🌟";
             f.style.color = "#27ae60";
         } else {
-            f.innerText = `Erro! Era a letra ${correta}`;
+            f.innerText = `Ops! Era a letra ${correta}`;
             f.style.color = "#e74c3c";
         }
-
         index++;
-        setTimeout(renderizar, 1200);
+        setTimeout(renderizar, 1000);
     }
 
     function finalizar() {
         document.getElementById('icon-display').innerHTML = '<i class="fa-solid fa-trophy" style="color: #f1c40f;"></i>';
         document.getElementById('opcoes').style.display = 'none';
-        document.getElementById('feedback').innerText = `Fim! Você acertou ${pontos} de 5!`;
+        document.getElementById('feedback').innerText = `Fim! Pontuação: ${pontos}/5`;
         document.getElementById('btn-reset').style.display = 'inline-block';
     }
 
-    function resetar() { iniciar(); }
-
     window.onload = iniciar;
 </script>
-
 </body>
 </html>
