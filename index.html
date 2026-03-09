@@ -3,204 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Letramento Digital - IFMS</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Jogo das Letras - Professor Jónison</title>
     <style>
         :root {
-            --cor-primaria: #2c3e50;
-            --cor-acerto: #27ae60;
-            --cor-erro: #e74c3c;
-            --cor-botao: #f39c12; /* Laranja para ser mais lúdico */
+            --fundo: #FFDE59; /* Amarelo lúdico */
+            --primaria: #FF5757; /* Vermelho suave */
+            --secundaria: #5CE1E6; /* Azul claro */
+            --acerto: #7ED957; /* Verde */
         }
 
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #f7f9f9;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
+            background-color: var(--fundo);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden;
         }
 
-        #game-container {
+        #painel-jogo {
             background: white;
-            padding: 40px;
-            border-radius: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            padding: 20px;
+            border-radius: 40px;
+            box-shadow: 0 15px 0px rgba(0,0,0,0.1);
             text-align: center;
-            width: 100%;
-            max-width: 400px;
-            border: 4px solid #eee;
+            width: 90%;
+            max-width: 450px;
+            border: 8px solid var(--secundaria);
         }
 
-        .placar {
+        .cabecalho {
             display: flex;
             justify-content: space-between;
-            font-weight: bold;
-            color: var(--cor-primaria);
-            margin-bottom: 10px;
-            font-size: 1.1rem;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 10px;
         }
 
-        #icon-display {
-            font-size: 130px;
-            margin: 20px 0;
-            color: #2980b9;
-            height: 160px;
+        .placar-box {
+            background: var(--secundaria);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .carta-principal {
+            background: #f9f9f9;
+            border: 4px dashed #ccc;
+            border-radius: 30px;
+            margin: 20px auto;
+            width: 180px;
+            height: 180px;
             display: flex;
             justify-content: center;
             align-items: center;
+            font-size: 100px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
         }
 
-        .btn-letra {
-            font-size: 35px;
+        .opcoes-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .botao-letra {
+            background: white;
+            border: 4px solid var(--secundaria);
+            border-radius: 20px;
+            font-size: 2.5rem;
             font-weight: bold;
-            padding: 15px;
-            margin: 8px;
+            color: var(--primaria);
+            padding: 10px;
             cursor: pointer;
-            border: none;
-            border-radius: 15px;
-            background-color: var(--cor-botao);
-            color: white;
             transition: all 0.2s;
-            width: 85px;
-            box-shadow: 0 5px #d35400;
+            box-shadow: 0 6px 0 var(--secundaria);
         }
 
-        .btn-letra:hover { transform: translateY(-3px); }
-        .btn-letra:active { transform: translateY(2px); box-shadow: 0 2px #d35400; }
+        .botao-letra:hover { transform: translateY(-3px); box-shadow: 0 9px 0 var(--secundaria); }
+        .botao-letra:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--secundaria); }
+        .botao-letra:disabled { opacity: 0.5; cursor: default; }
 
-        #feedback {
-            font-size: 1.4rem;
+        #mensagem-feedback {
+            font-size: 1.5rem;
+            height: 40px;
             margin-top: 20px;
+            color: var(--primaria);
             font-weight: bold;
-            min-height: 40px;
         }
 
-        .btn-reset {
+        .btn-reiniciar {
             display: none;
-            margin-top: 15px;
-            padding: 12px 25px;
-            background: var(--cor-primaria);
+            background: var(--acerto);
             color: white;
             border: none;
-            border-radius: 10px;
+            padding: 15px 30px;
+            border-radius: 20px;
+            font-size: 1.2rem;
             cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 0 #58a73d;
+            margin-top: 10px;
         }
+
+        /* Animações */
+        @keyframes balançar {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            75% { transform: rotate(-5deg); }
+            100% { transform: rotate(0deg); }
+        }
+        .animar { animation: balançar 0.5s ease-in-out; }
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    <div class="placar">
-        <span>Pontos: <span id="score">0</span></span>
-        <span>Questão: <span id="round">1</span>/5</span>
+<div id="painel-jogo">
+    <div class="cabecalho">
+        <div class="placar-box">⭐ Pontos: <span id="pontos">0</span></div>
+        <div style="font-weight: bold; color: #666;">Questão <span id="rodada">1</span> de 5</div>
     </div>
 
-    <div id="icon-display"></div>
-    <div id="opcoes"></div>
-    <div id="feedback">Qual a letra inicial?</div>
-    
-    <button id="btn-reset" class="btn-reset" onclick="iniciar()">Jogar de Novo</button>
+    <div class="carta-principal" id="carta">🍎</div>
+
+    <div id="instrucao" style="font-size: 1.2rem; color: #444;">Com qual letra começa?</div>
+
+    <div class="opcoes-container" id="container-letras">
+        </div>
+
+    <div id="mensagem-feedback"></div>
+    <button class="btn-reiniciar" id="btn-reiniciar" onclick="resetarJogo()">Jogar Novamente!</button>
 </div>
 
 <script>
-    // Banco de dados com ícones corrigidos
-    const bancoDeDados = [
-        { l: 'A', icon: 'fa-pineapple' },     // Abacaxi (necessário FA Pro ou similar, usando fallback para Solid)
-        { l: 'B', icon: 'fa-baseball' },      // Bola
-        { l: 'C', icon: 'fa-car' },           // Carro
-        { l: 'D', icon: 'fa-dice' },          // Dado
-        { l: 'E', icon: 'fa-egg' },           // Ovo (letra E)
-        { l: 'F', icon: 'fa-fish' },          // Peixe (Letra F - Fish) ou Fogo
-        { l: 'G', icon: 'fa-ghost' },         // Fantasma (Letra G - Ghost)
-        { l: 'H', icon: 'fa-hospital' },      // Hospital
-        { l: 'I', icon: 'fa-image' },         // Imagem
-        { l: 'C', icon: 'fa-playing-cards' }  // Carta (Letra C)
+    // Banco de dados 100% lúdico e em português
+    const dados = [
+        { l: 'A', e: '🍍' }, // Abacaxi
+        { l: 'B', e: '⚽' }, // Bola
+        { l: 'C', e: '🏠' }, // Casa
+        { l: 'D', e: '🎲' }, // Dado
+        { l: 'E', e: '🐘' }, // Elefante
+        { l: 'F', e: '🔥' }, // Fogo
+        { l: 'G', e: '🐱' }, // Gato
+        { l: 'H', e: '🚁' }, // Helicóptero
+        { l: 'I', e: '🍦' }, // Iogurte / Ice (Sorvete) -> Melhor: ⛪ (Igreja) ou 🏝️ (Ilha)
+        { l: 'J', e: '🚗' }  // Janela 🪟 ou Jacaré 🐊
+    ];
+    
+    // Substituindo alguns para evitar confusão
+    const bancoOriginal = [
+        { l: 'A', e: '🍍', n: 'ABACAXI' },
+        { l: 'B', e: '⚽', n: 'BOLA' },
+        { l: 'C', e: '🏠', n: 'CASA' },
+        { l: 'D', e: '🎲', n: 'DADO' },
+        { l: 'E', e: '🐘', n: 'ELEFANTE' },
+        { l: 'F', e: '🔪', n: 'FACA' },
+        { l: 'G', e: '🐱', n: 'GATO' },
+        { l: 'H', e: '🚁', n: 'HELICÓPTERO' },
+        { l: 'I', e: '🏝️', n: 'ILHA' },
+        { l: 'J', e: '🐊', n: 'JACARÉ' }
     ];
 
-    // Ajuste fino para garantir que os ícones existam na versão gratuita
-    const bancoAjustado = [
-        { l: 'A', icon: 'fa-apple-whole', nome: 'A de Maçã' }, // Apple em inglês, comum em TI
-        { l: 'B', icon: 'fa-basketball', nome: 'B de Bola' },
-        { l: 'C', icon: 'fa-clone', nome: 'C de Carta' },      // Ícone que parece cartas sobrepostas
-        { l: 'D', icon: 'fa-dice', nome: 'D de Dado' },
-        { l: 'E', icon: 'fa-eye', nome: 'E de Estrela/Eu' },
-        { l: 'F', icon: 'fa-fire', nome: 'F de Fogo' },
-        { l: 'G', icon: 'fa-guitar', nome: 'G de Guitarra' },
-        { l: 'H', icon: 'fa-helicopter', nome: 'H de Helicóptero' },
-        { l: 'I', icon: 'fa-igloo', nome: 'I de Iglu' },
-        { l: 'J', icon: 'fa-jet-fighter', nome: 'J de Jato' }
-    ];
-
-    let questoesAtuais = [];
-    let index = 0;
+    let sorteio = [];
+    let indice = 0;
     let pontos = 0;
 
     function iniciar() {
         pontos = 0;
-        index = 0;
-        document.getElementById('score').innerText = pontos;
-        document.getElementById('btn-reset').style.display = 'none';
-        document.getElementById('opcoes').style.display = 'block';
-        questoesAtuais = [...bancoAjustado].sort(() => Math.random() - 0.5).slice(0, 5);
-        renderizar();
+        indice = 0;
+        document.getElementById('pontos').innerText = pontos;
+        document.getElementById('btn-reiniciar').style.display = 'none';
+        document.getElementById('container-letras').style.display = 'grid';
+        
+        // Embaralha e seleciona 5 únicas
+        sorteio = [...bancoOriginal].sort(() => Math.random() - 0.5).slice(0, 5);
+        montarFase();
     }
 
-    function renderizar() {
-        if(index >= 5) {
+    function montarFase() {
+        if(indice >= 5) {
             finalizar();
             return;
         }
 
-        const q = questoesAtuais[index];
-        document.getElementById('round').innerText = index + 1;
-        // Se for a "Carta", usamos o ícone de 'clones' que parece cartas de baralho
-        document.getElementById('icon-display').innerHTML = `<i class="fa-solid ${q.icon}"></i>`;
-        document.getElementById('feedback').innerText = "Qual a letra inicial?";
-        document.getElementById('feedback').style.color = "#2c3e50";
-
-        const container = document.getElementById('opcoes');
-        container.innerHTML = "";
+        const atual = sorteio[indice];
+        document.getElementById('rodada').innerText = indice + 1;
+        document.getElementById('carta').innerText = atual.e;
+        document.getElementById('mensagem-feedback').innerText = "";
         
-        let letras = new Set([q.l]);
-        while(letras.size < 3) {
-            letras.add(bancoAjustado[Math.floor(Math.random()*10)].l);
+        const container = document.getElementById('container-letras');
+        container.innerHTML = "";
+
+        // Criar as 3 opções de letras
+        let letrasOpcoes = new Set([atual.l]);
+        while(letrasOpcoes.size < 3) {
+            let aleat = bancoOriginal[Math.floor(Math.random()*bancoOriginal.length)].l;
+            letrasOpcoes.add(aleat);
         }
 
-        [...letras].sort(() => Math.random() - 0.5).forEach(letra => {
+        // Embaralhar botões e criar na tela
+        [...letrasOpcoes].sort(() => Math.random() - 0.5).forEach(letra => {
             const btn = document.createElement('button');
-            btn.className = 'btn-letra';
+            btn.className = 'botao-letra';
             btn.innerText = letra;
-            btn.onclick = () => validar(letra, q.l);
+            btn.onclick = () => checar(letra, atual.l);
             container.appendChild(btn);
         });
     }
 
-    function validar(escolha, correta) {
-        const f = document.getElementById('feedback');
+    function checar(escolha, correta) {
+        const msg = document.getElementById('mensagem-feedback');
+        const botoes = document.querySelectorAll('.botao-letra');
+        botoes.forEach(b => b.disabled = true);
+
         if(escolha === correta) {
-            pontos++;
-            document.getElementById('score').innerText = pontos;
-            f.innerText = "Muito bem! 🌟";
-            f.style.color = "#27ae60";
+            pontos += 10;
+            document.getElementById('pontos').innerText = pontos;
+            msg.innerText = "MUITO BEM! 🌟";
+            msg.style.color = "var(--acerto)";
+            document.getElementById('carta').classList.add('animar');
         } else {
-            f.innerText = `Ops! Era a letra ${correta}`;
-            f.style.color = "#e74c3c";
+            msg.innerText = "QUASE! É A LETRA " + correta;
+            msg.style.color = "var(--primaria)";
         }
-        index++;
-        setTimeout(renderizar, 1000);
+
+        indice++;
+        setTimeout(() => {
+            document.getElementById('carta').classList.remove('animar');
+            montarFase();
+        }, 1500);
     }
 
     function finalizar() {
-        document.getElementById('icon-display').innerHTML = '<i class="fa-solid fa-trophy" style="color: #f1c40f;"></i>';
-        document.getElementById('opcoes').style.display = 'none';
-        document.getElementById('feedback').innerText = `Fim! Pontuação: ${pontos}/5`;
-        document.getElementById('btn-reset').style.display = 'inline-block';
+        document.getElementById('carta').innerText = "🏆";
+        document.getElementById('instrucao').innerText = "Parabéns, campeão!";
+        document.getElementById('container-letras').style.display = 'none';
+        document.getElementById('mensagem-feedback').innerText = "Você fez " + pontos + " pontos!";
+        document.getElementById('btn-reiniciar').style.display = 'inline-block';
+    }
+
+    function resetarJogo() {
+        iniciar();
     }
 
     window.onload = iniciar;
 </script>
+
 </body>
 </html>
